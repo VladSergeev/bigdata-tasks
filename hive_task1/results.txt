@@ -1,0 +1,154 @@
+
+##First task
+SELECT  UniqueCarrier,COUNT(UniqueCarrier) from flight_2007 group by UniqueCarrier;
+
+Query ID = root_20170906111104_967740c0-26d4-4703-bbed-bad88cf73bb7
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1504622710986_0006)
+
+--------------------------------------------------------------------------------
+        VERTICES      STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+--------------------------------------------------------------------------------
+Map 1 ..........   SUCCEEDED      1          1        0        0       0       0
+Reducer 2 ......   SUCCEEDED      2          2        0        0       0       0
+--------------------------------------------------------------------------------
+VERTICES: 02/02  [==========================>>] 100%  ELAPSED TIME: 13.09 s
+--------------------------------------------------------------------------------
+OK
+9E      258851
+AS      160185
+EV      286234
+FL      263159
+MQ      540494
+OH      233787
+US      485447
+YV      294362
+AA      633857
+AQ      46360
+B6      191450
+CO      323151
+DL      475889
+F9      97760
+HA      56175
+NW      414526
+OO      597882
+UA      490002
+WN      1168871
+XE      434773
+Time taken: 14.39 seconds, Fetched: 20 row(s)
+
+##Second task
+
+    > SELECT airp.airport,kek.counter from(
+    > SELECT data_set.airport,sum (data_set.counter) as counter
+    > from (SELECT flight.Origin as airport, COUNT(flight.Origin) as counter FROM flight_2007 flight
+    > WHERE 6<=flight.Month AND flight.Month<=8 AND flight.Cancelled=0
+    > GROUP BY flight.Origin
+    > UNION ALL
+    > SELECT flight.Dest as airport, COUNT(flight.Dest) as counter FROM flight_2007 flight
+    > WHERE 6<=flight.Month AND flight.Month<=8 AND flight.Cancelled=0
+    > GROUP BY flight.Dest)data_set GROUP BY data_set.airport) kek join airport airp on airp.iata=kek.airport
+    > ORDER BY kek.counter DESC
+    > limit 5;
+Query ID = root_20170906125918_87d6e4a2-3e2d-4188-b6d0-070a47235bc5
+Total jobs = 1
+Launching Job 1 out of 1
+Tez session was closed. Reopening...
+Session re-established.
+Status: Running (Executing on YARN cluster with App id application_1504622710986_0010)
+
+--------------------------------------------------------------------------------
+        VERTICES      STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+--------------------------------------------------------------------------------
+Map 1 ..........   SUCCEEDED      1          1        0        0       0       0
+Map 6 ..........   SUCCEEDED      1          1        0        0       0       0
+Map 8 ..........   SUCCEEDED      1          1        0        0       0       0
+Reducer 2 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 4 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 5 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 7 ......   SUCCEEDED      1          1        0        0       0       0
+--------------------------------------------------------------------------------
+VERTICES: 07/07  [==========================>>] 100%  ELAPSED TIME: 14.86 s
+--------------------------------------------------------------------------------
+OK
+William B Hartsfield-Atlanta Intl       215345
+Chicago O'Hare International    184225
+Dallas-Fort Worth International 147336
+Denver Intl     124295
+Los Angeles International       121493
+Time taken: 21.884 seconds, Fetched: 5 row(s)
+
+## Third task
+    > SELECT airp.airport,measured_flights.counter
+    >     from(
+    >           SELECT data_set.airport_code,sum (data_set.counter) as counter
+    >                 from (
+    >                       SELECT flight.Origin as airport_code, COUNT(flight.Origin) as counter FROM flight_2007 flight
+    >                              WHERE 6<=flight.Month AND flight.Month<=8 AND flight.Cancelled=0
+    >                              GROUP BY flight.Origin
+    >                       UNION ALL
+    >                       SELECT flight.Dest as airport_code, COUNT(flight.Dest) as counter FROM flight_2007 flight
+    >                              WHERE 6<=flight.Month AND flight.Month<=8 AND flight.Cancelled=0
+    >                              GROUP BY flight.Dest
+    >                 )data_set GROUP BY data_set.airport_code
+    >     ) measured_flights join airport airp on airp.iata=measured_flights.airport_code
+    > WHERE airp.country='USA'
+    > ORDER BY measured_flights.counter DESC
+    > limit 5;
+Query ID = root_20170906131334_5ca4bb3f-eeb8-4043-aa50-334e2f1bc068
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1504622710986_0010)
+
+--------------------------------------------------------------------------------
+        VERTICES      STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+--------------------------------------------------------------------------------
+Map 1 ..........   SUCCEEDED      1          1        0        0       0       0
+Map 6 ..........   SUCCEEDED      1          1        0        0       0       0
+Map 8 ..........   SUCCEEDED      1          1        0        0       0       0
+Reducer 2 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 4 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 5 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 7 ......   SUCCEEDED      1          1        0        0       0       0
+--------------------------------------------------------------------------------
+VERTICES: 07/07  [==========================>>] 100%  ELAPSED TIME: 14.51 s
+--------------------------------------------------------------------------------
+OK
+William B Hartsfield-Atlanta Intl       215345
+Chicago O'Hare International    184225
+Dallas-Fort Worth International 147336
+Denver Intl     124295
+Los Angeles International       121493
+Time taken: 16.354 seconds, Fetched: 5 row(s)
+
+## Four task
+
+    > SELECT carr.DESCRIPTION, carrier_flight.counter
+    >   from (
+    >         SELECT
+    >             UniqueCarrier,
+    >             COUNT(UniqueCarrier) as counter
+    >         from flight_2007
+    >         group by UniqueCarrier
+    >   )carrier_flight join carrier carr on carr.CODE=carrier_flight.UniqueCarrier
+    > ORDER BY carrier_flight.counter DESC
+    > limit 1;
+Query ID = root_20170906133406_a38dc8c5-0c41-4385-b7ef-42e55fcdd737
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1504622710986_0011)
+
+--------------------------------------------------------------------------------
+        VERTICES      STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED  KILLED
+--------------------------------------------------------------------------------
+Map 1 ..........   SUCCEEDED      1          1        0        0       0       0
+Map 4 ..........   SUCCEEDED      1          1        0        0       0       0
+Reducer 2 ......   SUCCEEDED      1          1        0        0       0       0
+Reducer 3 ......   SUCCEEDED      1          1        0        0       0       0
+--------------------------------------------------------------------------------
+VERTICES: 04/04  [==========================>>] 100%  ELAPSED TIME: 11.95 s
+--------------------------------------------------------------------------------
+OK
+Southwest Airlines Co.  1168871
+Time taken: 13.535 seconds, Fetched: 1 row(s)
